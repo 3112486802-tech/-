@@ -296,8 +296,8 @@ input[type="range"]::-moz-range-thumb{
           超过此加速度才计数；数值越小越灵敏
         </div>
         <div class="pc">
-          <input type="range" min="1" max="10" step="0.5" value="1" id="sensSlider" oninput="onSensChange(this.value)">
-          <span class="pv" id="sensVal">1.0 m/s²</span>
+          <input type="range" min="1" max="10" step="0.5" value="1.5" id="sensSlider" oninput="onSensChange(this.value)">
+          <span class="pv" id="sensVal">1.5 m/s²</span>
         </div>
       </div>
       <div class="pr">
@@ -323,7 +323,7 @@ let lastTrigger = 0;
 let startTime = null;
 let timerInterval = null;
 let cooldown = 190;   // ms
-let threshold = 1.0;  // m/s²，由滑块直接设定，范围 1~10 / 步长 0.5
+let threshold = 1.5;  // m/s²，由滑块直接设定，范围 1~10 / 步长 0.5
 let lastMotionTime = 0;       // 最近一次 devicemotion 时间戳
 let stallWatchInterval = null; // 心跳看门狗：事件流挂起时自动重订阅
 const STALL_MS = 3000;         // 超过这个时间没事件就认为挂起
@@ -606,7 +606,7 @@ function requestPerm() {
 // ── 初始化 ────────────────────────────────────────
 (function init() {
   // 设置初始 threshold 显示
-  onSensChange(1);
+  onSensChange(1.5);
   onCoolChange(190);
 
   // 检测 iOS 需要权限
