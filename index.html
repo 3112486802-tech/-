@@ -306,8 +306,8 @@ input[type="range"]::-moz-range-thumb{
           同一次振动不重复计数的间隔
         </div>
         <div class="pc">
-          <input type="range" min="100" max="1000" step="10" value="190" id="coolSlider" oninput="onCoolChange(this.value)">
-          <span class="pv" id="coolVal">190ms</span>
+          <input type="range" min="100" max="1000" step="10" value="200" id="coolSlider" oninput="onCoolChange(this.value)">
+          <span class="pv" id="coolVal">200ms</span>
         </div>
       </div>
     </div>
@@ -322,7 +322,7 @@ let maxAccel = 0;
 let lastTrigger = 0;
 let startTime = null;
 let timerInterval = null;
-let cooldown = 190;   // ms
+let cooldown = 200;   // ms
 let threshold = 1.5;  // m/s²，由滑块直接设定，范围 1~10 / 步长 0.5
 let lastMotionTime = 0;       // 最近一次 devicemotion 时间戳
 let stallWatchInterval = null; // 心跳看门狗：事件流挂起时自动重订阅
@@ -607,7 +607,7 @@ function requestPerm() {
 (function init() {
   // 设置初始 threshold 显示
   onSensChange(1.5);
-  onCoolChange(190);
+  onCoolChange(200);
 
   // 检测 iOS 需要权限
   if (typeof DeviceMotionEvent !== 'undefined' &&
