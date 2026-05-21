@@ -39,44 +39,6 @@ body{
   text-rendering:optimizeLegibility;
 }
 
-/* Header：贴顶毛玻璃，极克制 */
-.hd{
-  background:rgba(38,38,36,.82);
-  border-bottom:1px solid var(--bd);
-  padding:14px 18px;
-  display:flex;align-items:center;justify-content:space-between;
-  position:sticky;top:0;z-index:100;
-  backdrop-filter:blur(20px) saturate(140%);
-  -webkit-backdrop-filter:blur(20px) saturate(140%);
-}
-.logo{
-  font-family:var(--serif);
-  font-size:18px;font-weight:500;font-style:italic;
-  color:var(--tx);letter-spacing:.2px;
-  display:flex;align-items:center;gap:10px;
-}
-.logo-dot{
-  width:8px;height:8px;background:var(--ac);border-radius:50%;
-  box-shadow:0 0 0 4px var(--ac-soft);
-  animation:breathe 3.2s ease-in-out infinite;
-}
-@keyframes breathe{0%,100%{opacity:.9}50%{opacity:.45}}
-.badge{
-  font-family:var(--mono);
-  background:var(--ac-soft);
-  color:var(--ac);
-  border:1px solid rgba(217,119,87,.28);
-  font-size:12px;font-weight:600;
-  padding:5px 14px;border-radius:100px;
-  min-width:54px;text-align:center;
-  font-variant-numeric:tabular-nums;
-  transition:transform .12s ease, background .2s, color .2s, border-color .2s;
-}
-.badge.pop{
-  transform:scale(1.22);
-  background:var(--ac);color:#1f1e1d;border-color:transparent;
-}
-
 main{padding:18px 0 32px}
 
 /* 主计数卡片 */
@@ -289,11 +251,6 @@ input[type="range"]::-moz-range-thumb{
 </style>
 </head>
 <body>
-<header class="hd">
-  <div class="logo"><div class="logo-dot"></div>Vibration·Counter</div>
-  <div class="badge" id="topBadge">0</div>
-</header>
-
 <main>
   <!-- iOS 权限提示 -->
   <div class="perm-box" id="permBox">
@@ -448,12 +405,15 @@ function resetCount() {
 function updateCountUI(flash) {
   const el = document.getElementById('countNum');
   el.textContent = count;
-  document.getElementById('topBadge').textContent = count;
+  const badge = document.getElementById('topBadge');
+  if (badge) badge.textContent = count;
   if (flash) {
     el.classList.add('flash');
-    const badge = document.getElementById('topBadge');
-    badge.classList.add('pop');
-    setTimeout(() => { el.classList.remove('flash'); badge.classList.remove('pop'); }, 150);
+    if (badge) badge.classList.add('pop');
+    setTimeout(() => {
+      el.classList.remove('flash');
+      if (badge) badge.classList.remove('pop');
+    }, 150);
   }
 }
 
