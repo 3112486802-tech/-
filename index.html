@@ -179,7 +179,7 @@ main{padding:18px 0 32px}
 .pc{display:flex;align-items:center;gap:10px;flex-shrink:0}
 .pv{
   font-family:var(--mono);font-size:12px;
-  color:var(--ac);min-width:48px;text-align:right;
+  color:var(--ac);min-width:62px;text-align:right;
   font-variant-numeric:tabular-nums;
 }
 
@@ -292,12 +292,12 @@ input[type="range"]::-moz-range-thumb{
     <div class="sb open" id="cfg">
       <div class="pr">
         <div class="pl">
-          <strong>灵敏度</strong>
-          低=需要大动作 / 高=轻微振动即触发
+          <strong>触发阈值</strong>
+          超过此加速度才计数；数值越小越灵敏
         </div>
         <div class="pc">
-          <input type="range" min="1" max="10" value="10" id="sensSlider" oninput="onSensChange(this.value)">
-          <span class="pv" id="sensVal">10</span>
+          <input type="range" min="1" max="10" step="0.5" value="1" id="sensSlider" oninput="onSensChange(this.value)">
+          <span class="pv" id="sensVal">1.0 m/s²</span>
         </div>
       </div>
       <div class="pr">
@@ -309,10 +309,6 @@ input[type="range"]::-moz-range-thumb{
           <input type="range" min="100" max="1000" step="10" value="190" id="coolSlider" oninput="onCoolChange(this.value)">
           <span class="pv" id="coolVal">190ms</span>
         </div>
-      </div>
-      <div class="pr" style="margin-top:4px">
-        <div class="pl"><strong>当前阈值</strong>超过此加速度才计数</div>
-        <div class="pc"><span class="pv" id="threshDisp">10.0 m/s²</span></div>
       </div>
     </div>
   </div>
@@ -327,17 +323,10 @@ let lastTrigger = 0;
 let startTime = null;
 let timerInterval = null;
 let cooldown = 190;   // ms
-let sensitivity = 10; // 1~10
-let threshold = 1.0;  // m/s²，由 sensitivity 映射
+let threshold = 1.0;  // m/s²，由滑块直接设定，范围 1~10 / 步长 0.5
 let lastMotionTime = 0;       // 最近一次 devicemotion 时间戳
 let stallWatchInterval = null; // 心跳看门狗：事件流挂起时自动重订阅
 const STALL_MS = 3000;         // 超过这个时间没事件就认为挂起
-
-// sensitivity → threshold 映射（1=19 m/s²，10=1 m/s²）
-// 之前 10 档对应 2.0，对轻微振动仍偏迟钝；下移到 1.0，灵敏度翻倍。
-function sensToThreshold(s) {
-  return 21 - s * 2;
-}
 
 // ── UI 工具 ───────────────────────────────────────
 function toggleSec(id) {
@@ -346,10 +335,8 @@ function toggleSec(id) {
 }
 
 function onSensChange(v) {
-  sensitivity = parseInt(v);
-  threshold = sensToThreshold(sensitivity);
-  document.getElementById('sensVal').textContent = v;
-  document.getElementById('threshDisp').textContent = threshold.toFixed(1) + ' m/s²';
+  threshold = parseFloat(v);
+  document.getElementById('sensVal').textContent = threshold.toFixed(1) + ' m/s²';
   updateThresholdLine();
 }
 
@@ -619,7 +606,7 @@ function requestPerm() {
 // ── 初始化 ────────────────────────────────────────
 (function init() {
   // 设置初始 threshold 显示
-  onSensChange(10);
+  onSensChange(1);
   onCoolChange(190);
 
   // 检测 iOS 需要权限
