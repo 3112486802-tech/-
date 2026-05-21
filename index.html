@@ -328,14 +328,15 @@ let startTime = null;
 let timerInterval = null;
 let cooldown = 190;   // ms
 let sensitivity = 10; // 1~10
-let threshold = 2.0;  // m/s²，由 sensitivity 映射
+let threshold = 1.0;  // m/s²，由 sensitivity 映射
 let lastMotionTime = 0;       // 最近一次 devicemotion 时间戳
 let stallWatchInterval = null; // 心跳看门狗：事件流挂起时自动重订阅
 const STALL_MS = 3000;         // 超过这个时间没事件就认为挂起
 
-// sensitivity → threshold 映射（1=20, 10=2）
+// sensitivity → threshold 映射（1=19 m/s²，10=1 m/s²）
+// 之前 10 档对应 2.0，对轻微振动仍偏迟钝；下移到 1.0，灵敏度翻倍。
 function sensToThreshold(s) {
-  return 22 - s * 2;
+  return 21 - s * 2;
 }
 
 // ── UI 工具 ───────────────────────────────────────
