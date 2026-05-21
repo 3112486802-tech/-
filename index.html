@@ -185,7 +185,7 @@ input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;hei
           超过此强度视为大冲击，不计数；拉到顶=不限
         </div>
         <div class="pc">
-          <input type="range" min="20" max="30" step="1" value="30" id="upperSlider" oninput="onUpperChange(this.value)">
+          <input type="range" min="20" max="45" step="1" value="30" id="upperSlider" oninput="onUpperChange(this.value)">
           <span class="pv" id="upperVal">30</span>
         </div>
       </div>
@@ -227,7 +227,7 @@ let baseline = null;
 let latestVibration = 0;
 const BASELINE_ALPHA = 0.05;   // 基线 EMA 系数，越小基线越慢；真机可微调
 let upperLimit = 30;           // 动作上限 m/s²；由「动作上限」滑块调整，达到 UPPER_MAX 时为不限
-const UPPER_MAX = 30;          // 「动作上限」滑块顶端 = 不限
+const UPPER_MAX = 45;          // 「动作上限」滑块顶端 = 不限
 let lastTouchTime = 0;         // 最近一次触摸时间戳，用于触摸期间抑制计数
 const TOUCH_GUARD_MS = 400;    // 触摸后多久内不计数
 let paused = false;            // 长按数字暂停时为 true
@@ -400,10 +400,9 @@ function onMotion(e) {
   const x = a.x || 0, y = a.y || 0, z = a.z || 0;
   const mag = Math.sqrt(x * x + y * y + z * z);
 
-  // 高通滤波：剥离重力／朝向，得到偏离基线的振动量。
-  // 振动强（≥threshold）时冻结基线，防止 EMA 追上晃动均值导致越晃越不灵。
+  // 高通滤波：剥离重力／朝向，得到偏离基线的振动量
   const [nb, vibration] = highPassStep(baseline, mag, BASELINE_ALPHA);
-  if (baseline === null || vibration < threshold) baseline = nb;
+  baseline = nb;
   latestVibration = vibration;
 
   if (running && !paused) {
@@ -596,20 +595,16 @@ function togglePause() {
 // 区分短按（归零）与长按（暂停 / 恢复）
 let pressTimer = null;
 let longPressed = false;
-let pressValid = false; // 本次按压是否仍有效；被滚动取消后置 false，pressEnd 不再归零
 function pressStart() {
   longPressed = false;
-  pressValid = true;
   pressTimer = setTimeout(() => { longPressed = true; togglePause(); }, LONGPRESS_MS);
 }
 function pressEnd() {
   if (pressTimer) { clearTimeout(pressTimer); pressTimer = null; }
-  if (pressValid && !longPressed) tapCount();
-  pressValid = false;
+  if (!longPressed) tapCount();
 }
 function pressCancel() {
   if (pressTimer) { clearTimeout(pressTimer); pressTimer = null; }
-  pressValid = false;
 }
 
 // ── iOS 权限 ──────────────────────────────────────
@@ -688,31 +683,14 @@ function requestPerm() {
   }, { passive: true });
   document.addEventListener('touchend', noteTouch, { passive: true });
 
-  // 主数字：短按 = 归零，长按 = 暂停 / 恢复。
-  // 不 preventDefault，否则手指落在大数字上时页面无法滚动；
-  // 改为：touchmove 移动超过 10px 视为滚动，取消按压并放行原生滚动。
+  // 主数字：短按 = 归零，长按 = 暂停 / 恢复
   const countNumEl = document.getElementById('countNum');
-  let lastTouchActivity = 0, touchStartX = 0, touchStartY = 0;
-  const fromTouch = () => Date.now() - lastTouchActivity < 700;
-  countNumEl.addEventListener('touchstart', e => {
-    lastTouchActivity = Date.now();
-    const t = e.touches[0];
-    touchStartX = t.clientX; touchStartY = t.clientY;
-    pressStart();
-  }, { passive: true });
-  countNumEl.addEventListener('touchmove', e => {
-    lastTouchActivity = Date.now();
-    const t = e.touches[0];
-    if (Math.abs(t.clientX - touchStartX) > 10 || Math.abs(t.clientY - touchStartY) > 10) {
-      pressCancel();
-    }
-  }, { passive: true });
-  countNumEl.addEventListener('touchend', () => { lastTouchActivity = Date.now(); pressEnd(); });
-  countNumEl.addEventListener('touchcancel', () => { lastTouchActivity = Date.now(); pressCancel(); });
-  // mouse 事件加护栏：跳过 touch 合成的鼠标事件，避免按压重复触发
-  countNumEl.addEventListener('mousedown', () => { if (!fromTouch()) pressStart(); });
-  countNumEl.addEventListener('mouseup', () => { if (!fromTouch()) pressEnd(); });
-  countNumEl.addEventListener('mouseleave', () => { if (!fromTouch()) pressCancel(); });
+  countNumEl.addEventListener('touchstart', e => { e.preventDefault(); pressStart(); }, { passive: false });
+  countNumEl.addEventListener('touchend', pressEnd);
+  countNumEl.addEventListener('touchcancel', pressCancel);
+  countNumEl.addEventListener('mousedown', pressStart);
+  countNumEl.addEventListener('mouseup', pressEnd);
+  countNumEl.addEventListener('mouseleave', pressCancel);
   // 键盘可达：Enter / Space 触发短按（归零）；长按暂停为指针专属手势
   countNumEl.addEventListener('keydown', e => {
     if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); tapCount(); }
