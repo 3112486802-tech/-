@@ -74,11 +74,11 @@ main{padding:18px 0 32px}
 /* 大数字：衬线 + 等宽数字位，避免位数变化跳动 */
 .count-num{
   font-family:var(--serif);
-  font-size:104px;font-weight:500;
+  font-size:68px;font-weight:500;
   font-variant-numeric:tabular-nums lining-nums;
   color:var(--ac);text-align:center;
-  padding:28px 0 6px;line-height:1;
-  letter-spacing:-2px;
+  padding:14px 0 2px;line-height:1;
+  letter-spacing:-1px;
   transition:color .12s, transform .15s;
   cursor:pointer;user-select:none;-webkit-user-select:none;
 }
@@ -86,15 +86,15 @@ main{padding:18px 0 32px}
 .count-num.flash{color:var(--tx)}
 
 .count-tap-hint{
-  font-size:12px;color:var(--tm);text-align:center;
+  font-size:11px;color:var(--tm);text-align:center;
   font-family:var(--sans);letter-spacing:.2px;
-  padding-bottom:4px;transition:opacity .3s;
+  padding-bottom:2px;transition:opacity .3s;
 }
 .count-tap-hint.hidden{opacity:0}
 
 .count-sub{
-  font-size:12px;color:var(--td);text-align:center;
-  padding:0 0 6px;
+  font-size:11px;color:var(--td);text-align:center;
+  padding:0 0 4px;
   font-family:var(--mono);font-variant-numeric:tabular-nums;
 }
 
